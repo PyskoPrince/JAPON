@@ -788,6 +788,360 @@ document.addEventListener("DOMContentLoaded",function(){
   paint();
 });
 </script>
+<!-- ===== Tablas interactivas: matriz de amenazas (3.3) y Plantillas B, C y D ===== -->
+<style>
+.ix-in,.ix-area,.ix-sel{width:100%;font:inherit;font-size:.92rem;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 8px;transition:border-color .15s ease,box-shadow .15s ease}
+.ix-area{display:block;resize:vertical;min-height:38px;overflow:hidden;line-height:1.4}
+.ix-in:focus,.ix-area:focus,.ix-sel:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(76,161,175,.2)}
+.ix-in::placeholder,.ix-area::placeholder{color:#9AA5AF;font-style:italic}
+.ix-sel{cursor:pointer;padding-right:4px}
+.ix-sel.ix-auto{border-style:dashed;border-color:var(--cyan)}
+table.ix td,table.ix tbody th{vertical-align:middle}
+table.ix.wide .ix-in,table.ix.wide .ix-area{min-width:170px}
+table.ix.wide .ix-sel{min-width:120px}
+table.ix td.ix-calc{font-family:var(--display);font-size:1.3rem;text-align:center;color:var(--deep);white-space:nowrap}
+table.ix td.ix-lvl{text-align:center;letter-spacing:.05em;font-size:.82rem;font-weight:700;color:var(--muted);white-space:nowrap}
+table.ix td.ix-lvl.lvl-critical,table.ix td.ix-lvl.lvl-high,table.ix td.ix-lvl.lvl-low{color:#fff}
+table.ix td.ix-lvl.lvl-medium{color:var(--night)}
+.ix-mini{display:flex;align-items:center;gap:5px;flex-wrap:nowrap}
+table.ix .ix-mini .ix-sel{width:auto;min-width:50px;padding:5px 3px}
+.ix-mini>span:not(.ix-out){font-size:.75rem;font-weight:700;color:var(--muted)}
+.ix-out{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.ix-out b{font-family:var(--display);font-size:1.15rem;color:var(--deep);font-weight:400}
+.ix-badge{display:inline-block;min-width:64px;text-align:center;padding:3px 9px;border-radius:999px;font-size:.72rem;font-weight:700;letter-spacing:.04em;background:var(--cyan-tint);color:var(--muted);white-space:nowrap;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ix-badge.lvl-critical{background:var(--lvl-critical);color:#fff}
+.ix-badge.lvl-high{background:var(--lvl-high);color:#fff}
+.ix-badge.lvl-medium{background:var(--lvl-medium);color:var(--night)}
+.ix-badge.lvl-low{background:var(--lvl-low);color:#fff}
+.ix-badge.ix-zero{opacity:.35}
+.ix-score{display:flex;align-items:center;gap:8px}
+table.ix .ix-score .ix-in{width:66px;min-width:66px;text-align:center}
+.ix-del{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;padding:0;background:#fff;border:1px solid var(--line);border-radius:50%;color:var(--muted);cursor:pointer;font-size:1.05rem;line-height:1}
+.ix-del:hover,.ix-del:focus-visible{border-color:var(--lvl-critical);color:var(--lvl-critical)}
+table.ix th.ix-x,table.ix td.ix-x{width:46px;text-align:center}
+.ix-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:-16px 0 28px}
+.ix-sum{margin-left:auto;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.ix-sum-g{display:inline-flex;flex-wrap:wrap;gap:4px;align-items:center}
+.ix-sum-l{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:2px}
+.ix-hint{display:block;margin-top:6px;font-size:.8rem;font-weight:600;color:var(--cyan-ink)}
+.ix-hint.warn{color:var(--orange-ink)}
+.ix-note{font-size:.8rem;color:var(--muted);margin:-18px 0 28px}
+.dlg-b .ix-tools{margin:12px 0 0}
+.dlg-b .ps-result{margin:12px 0 0}
+@media (max-width:720px){.ix-sum{margin-left:0}}
+.ix-pv{display:none}
+@media print{
+  .ix-tools,.ix-note,.ix-del,table.ix .ix-x{display:none!important}
+  table.ix .ix-in,table.ix .ix-sel,table.ix .ix-area{display:none!important}
+  table.ix .ix-pv{display:block;min-height:1.3em;padding:1px 0;border-bottom:1px dotted #9AA5AF;white-space:pre-wrap;overflow-wrap:break-word;font-size:.8rem}
+  table.ix .ix-mini .ix-pv,table.ix .ix-score .ix-pv{display:inline-block;min-width:1.6em;text-align:center}
+  table.ix td.ix-lvl{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  /* «Print this template»: solo la plantilla, sin cientos de páginas en blanco */
+  body.print-tpl-mode *:not(:has(.print-only)):not(.print-only):not(.print-only *){display:none!important}
+  body.print-tpl-mode .print-only{position:static!important}
+}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  var RD=window.RISK_DATA||{};
+  var BANDS=RD.bands||[
+    {min:16,max:25,level:"Critical",key:"critical",prio:"P1",deadline:""},
+    {min:10,max:15,level:"High",key:"high",prio:"P2",deadline:""},
+    {min:5,max:9,level:"Medium",key:"medium",prio:"P3",deadline:""},
+    {min:1,max:4,level:"Low",key:"low",prio:"P4",deadline:""}];
+  var PROB=RD.prob||["Remote","Unlikely","Possible","Likely","Almost certain"];
+  var IMP=RD.imp||["Minimal","Limited","Moderate","Significant","Maximum or irreversible"];
+
+  /* ---------- utilidades ---------- */
+  function band(s){ s=+s; if(!s) return null; for(var i=0;i<BANDS.length;i++){ if(s>=BANDS[i].min&&s<=BANDS[i].max) return BANDS[i]; } return null; }
+  function esc(t){ return String(t==null?"":t).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+  function copy(x){ return JSON.parse(JSON.stringify(x)); }
+  function store(k,v){
+    try{
+      if(v===undefined) return JSON.parse(localStorage.getItem("hs-ix:"+k)||"null");
+      if(v===null) localStorage.removeItem("hs-ix:"+k); else localStorage.setItem("hs-ix:"+k,JSON.stringify(v));
+    }catch(e){ return null; }
+  }
+  function grow(t){ if(!t.offsetParent) return; t.style.height="auto"; t.style.height=(t.scrollHeight+2)+"px"; }
+  function wrapOf(label,first){
+    var ts=document.querySelectorAll('table[aria-label="'+label+'"]');
+    for(var k=0;k<ts.length;k++){
+      var th=ts[k].tHead&&ts[k].tHead.rows[0]&&ts[k].tHead.rows[0].cells[0];
+      if(th&&th.textContent.trim()===first) return ts[k].closest(".table-wrap");
+    }
+    return null;
+  }
+  function scale(list){ return [["","—"]].concat(list.map(function(t,i){ return [i+1,(i+1)+" · "+String(t).split(":")[0],t]; })); }
+  var OPT={
+    p:scale(PROB), i:scale(IMP),
+    n:[["","–"],[1,"1"],[2,"2"],[3,"3"],[4,"4"],[5,"5"]],
+    prio:[["","—"],["P1","P1"],["P2","P2"],["P3","P3"],["P4","P4"]],
+    treat:[["","—"],["Mitigate","Mitigate"],["Avoid","Avoid"],["Transfer or share","Transfer or share"],["Accept","Accept"]],
+    status:[["","—"],["Not started","Not started"],["In progress","In progress"],["Implemented","Implemented"],["Closed","Closed"]]
+  };
+  function sel(opts,val,aria,cls){
+    return '<select class="ix-sel'+(cls?" "+cls:"")+'" aria-label="'+esc(aria)+'">'+opts.map(function(o){
+      return '<option value="'+esc(o[0])+'"'+(String(o[0])===String(val)?" selected":"")+(o[2]?' title="'+esc(o[2])+'"':"")+">"+esc(o[1])+"</option>";
+    }).join("")+"</select>";
+  }
+  function badge(b){ return b?'<span class="ix-badge lvl-'+b.key+'" title="'+esc(b.prio+" · "+b.deadline)+'">'+b.level.toUpperCase()+"</span>":""; }
+  function selv(tr,ci,k){ var s=tr.cells[ci]&&tr.cells[ci].querySelectorAll("select")[k||0]; return s?(+s.value||0):0; }
+  function numv(tr,ci){ var i=tr.cells[ci]&&tr.cells[ci].querySelector("input"); var n=i?Math.round(+i.value):0; return n>=1&&n<=25?n:0; }
+
+  /* ---------- motor de tablas ---------- */
+  function cellFor(g,c,ci,row){
+    var head=(ci===0&&g.rowHead), cell=document.createElement(head?"th":"td"), v=row.v[ci], L=g.labels[ci];
+    if(head) cell.setAttribute("scope","row");
+    cell.setAttribute("data-label",L);
+    switch(c.t){
+      case "text": cell.innerHTML='<input type="text" class="ix-in" placeholder="'+esc(c.ph)+'" aria-label="'+esc(L)+'" value="'+esc(v)+'">'; break;
+      case "threat": cell.innerHTML=row.f?"<strong>"+esc(row.f)+"</strong>":'<input type="text" class="ix-in" placeholder="'+esc(row.ph||c.ph)+'" aria-label="'+esc(L)+'" value="'+esc(v)+'">'; break;
+      case "area": cell.innerHTML='<textarea class="ix-area" rows="1" placeholder="'+esc(c.ph)+'" aria-label="'+esc(L)+'">'+esc(v)+"</textarea>"; break;
+      case "date": cell.innerHTML='<input type="date" class="ix-in" aria-label="'+esc(L)+'" value="'+esc(v)+'">'; break;
+      case "p": case "i": case "treat": case "status": cell.innerHTML=sel(OPT[c.t],v,L); break;
+      case "prio": cell.innerHTML=sel(OPT.prio,v,L); cell.querySelector("select").title="Set from the inherent score. Change it to raise the level (section 3.4, Step 2)."; break;
+      case "calc": cell.className="ix-calc"; break;
+      case "lvl": cell.className="ix-lvl"; break;
+      case "resid": v=v||["",""]; cell.innerHTML='<div class="ix-mini"><span>P</span>'+sel(OPT.n,v[0],"Residual probability")+"<span>I</span>"+sel(OPT.n,v[1],"Residual impact")+'<span class="ix-out"></span></div>'; break;
+      case "score": cell.innerHTML='<div class="ix-score"><input type="number" min="1" max="25" step="1" inputmode="numeric" class="ix-in" placeholder="1–25" aria-label="'+esc(L)+'" value="'+esc(v)+'"><span class="ix-out"></span></div>'; break;
+      case "id": cell.innerHTML="<strong>"+esc(v)+"</strong>"; break;
+    }
+    return cell;
+  }
+  function makeRow(g,row){
+    var tr=document.createElement("tr");
+    g.cols.forEach(function(c,ci){ tr.appendChild(cellFor(g,c,ci,row)); });
+    if(g.del){ var x=document.createElement("td"); x.className="ix-x"; x.innerHTML='<button type="button" class="ix-del" aria-label="Remove row" title="Remove row">×</button>'; tr.appendChild(x); }
+    tr._row={f:row.f||null,ph:row.ph||null,m:row.m||0};
+    return tr;
+  }
+  function readRow(g,tr){
+    var v=g.cols.map(function(c,ci){
+      var cell=tr.cells[ci];
+      if(c.t==="resid"){ var s=cell.querySelectorAll("select"); return [s[0].value,s[1].value]; }
+      if(c.t==="id") return cell.textContent.trim();
+      var f=cell.querySelector("input,textarea,select"); return f?f.value:null;
+    });
+    return {f:tr._row.f,ph:tr._row.ph,m:tr._row.m,v:v};
+  }
+  function compute(g,tr){
+    var P=0,I=0;
+    g.cols.forEach(function(c,ci){ if(c.t==="p") P=selv(tr,ci); if(c.t==="i") I=selv(tr,ci); });
+    var score=P&&I?P*I:0, b=band(score);
+    g.cols.forEach(function(c,ci){
+      var cell=tr.cells[ci];
+      if(c.t==="calc") cell.textContent=score||"—";
+      if(c.t==="lvl"){ cell.className="ix-lvl"+(b?" lvl-"+b.key:""); cell.textContent=b?b.level.toUpperCase():"—"; cell.title=b?b.prio+" · "+b.deadline:""; }
+      if(c.t==="resid"){ var r=selv(tr,ci,0)*selv(tr,ci,1); cell.querySelector(".ix-out").innerHTML=r?"<b>"+r+"</b>"+badge(band(r)):""; }
+      if(c.t==="score"){ var n=numv(tr,ci); cell.querySelector(".ix-out").innerHTML=badge(band(n)); }
+    });
+    if(g.onRow) g.onRow(tr);
+  }
+  function counts(g,fn){ var c={}; BANDS.forEach(function(b){c[b.key]=0;}); [].forEach.call(g.tbody.rows,function(tr){ var b=band(fn(tr)); if(b) c[b.key]++; }); return c; }
+  function summary(g){
+    if(!g.tools||!g.levels) return;
+    g.tools.querySelector(".ix-sum").innerHTML=g.levels.map(function(L){
+      var c=counts(g,L[1]);
+      return '<span class="ix-sum-g"><span class="ix-sum-l">'+L[0]+"</span>"+BANDS.map(function(b){ return '<span class="ix-badge lvl-'+b.key+(c[b.key]?"":" ix-zero")+'">'+c[b.key]+" "+b.level+"</span>"; }).join("")+"</span>";
+    }).join("");
+  }
+  function save(g){ clearTimeout(g._t); g._t=setTimeout(function(){ store(g.key,{rows:[].map.call(g.tbody.rows,function(tr){ return readRow(g,tr); })}); },250); }
+
+  function Grid(g){
+    var table=g.wrap.querySelector("table");
+    if(!table||table.classList.contains("ix")) return null;
+    table.classList.add("ix");
+    g.table=table; g.tbody=table.tBodies[0];
+    g.labels=[].map.call(table.tHead.rows[0].cells,function(c){ return c.textContent.trim(); });
+    g.initial=[].map.call(g.tbody.rows,g.fromDom);
+    if(g.del){ var th=document.createElement("th"); th.setAttribute("scope","col"); th.className="ix-x"; th.innerHTML='<span class="sr-only">Remove row</span>'; table.tHead.rows[0].appendChild(th); }
+    g.render=function(rows){
+      g.tbody.innerHTML="";
+      rows.forEach(function(r){ g.tbody.appendChild(makeRow(g,r)); });
+      [].forEach.call(g.tbody.rows,function(tr){ compute(g,tr); });
+      g.tbody.querySelectorAll("textarea").forEach(grow);
+      summary(g);
+    };
+    g.add=function(r){
+      var tr=makeRow(g,r||g.blank()); g.tbody.appendChild(tr);
+      compute(g,tr); tr.querySelectorAll("textarea").forEach(grow); summary(g); save(g); return tr;
+    };
+    var saved=store(g.key);
+    g.render(saved&&saved.rows&&saved.rows.length?saved.rows:copy(g.initial));
+
+    function onEdit(e){
+      var tr=e.target.closest("tr"); if(!tr||!g.tbody.contains(tr)) return;
+      if(e.target.tagName==="TEXTAREA") grow(e.target);
+      if(g.onEdit) g.onEdit(e,tr);
+      compute(g,tr); summary(g); save(g);
+    }
+    g.tbody.addEventListener("input",onEdit);
+    g.tbody.addEventListener("change",onEdit);
+    g.tbody.addEventListener("click",function(e){
+      var b=e.target.closest(".ix-del"); if(!b) return;
+      b.closest("tr").remove(); if(!g.tbody.rows.length) g.add(); summary(g); save(g);
+    });
+
+    var tools=document.createElement("div"); tools.className="ix-tools";
+    tools.innerHTML=(g.blank?'<button type="button" class="expand" data-ix="add">+ Add row</button>':"")+(g.extra||"")+'<button type="button" class="expand" data-ix="clear">Clear</button><span class="ix-sum" aria-live="polite"></span>';
+    g.wrap.parentNode.insertBefore(tools,g.wrap.nextSibling);
+    g.tools=tools;
+    tools.addEventListener("click",function(e){
+      var b=e.target.closest("button[data-ix]"); if(!b) return;
+      var a=b.getAttribute("data-ix");
+      if(a==="add"){ var tr=g.add(), f=tr.querySelector("input,textarea,select"); if(f) f.focus(); }
+      else if(a==="clear"){ if(!window.confirm("Clear every entry in this table?")) return; store(g.key,null); g.render(copy(g.initial)); }
+      else if(g.actions&&g.actions[a]) g.actions[a]();
+    });
+    summary(g);
+    liveExpand(g.wrap);
+    return g;
+  }
+
+  /* ---------- «Expand table» con la tabla viva (sin perder lo capturado) ---------- */
+  function liveExpand(wrap){
+    var tt=wrap&&wrap.previousElementSibling;
+    if(!tt||!tt.classList.contains("table-tools")) return;
+    var old=tt.querySelector("button.expand"); if(!old||old._ix) return;
+    var btn=old.cloneNode(true); btn._ix=1; old.parentNode.replaceChild(btn,old);
+    btn.addEventListener("click",function(){
+      var dlg=document.getElementById("tbl-dialog"); if(!dlg||!dlg.showModal) return;
+      dlg.querySelector(".dlg-h p").textContent=wrap.querySelector("table").getAttribute("aria-label")||"Table";
+      var body=dlg.querySelector(".dlg-b"); body.innerHTML="";
+      var mark=document.createComment("ix-home"); wrap.parentNode.insertBefore(mark,wrap);
+      var moving=[wrap], n=wrap.nextElementSibling;
+      while(n&&(n.classList.contains("ix-tools")||n.classList.contains("ps-result"))){ moving.push(n); n=n.nextElementSibling; }
+      moving.forEach(function(m){ body.appendChild(m); });
+      dlg.addEventListener("close",function(){ moving.forEach(function(m){ mark.parentNode.insertBefore(m,mark); }); mark.parentNode.removeChild(mark); },{once:true});
+      dlg.showModal();
+    });
+  }
+
+  /* ---------- 3.3: matriz de amenazas ---------- */
+  var w33=wrapOf("Risk assessment matrix","Threat");
+  if(w33) Grid({
+    wrap:w33, key:"threat-matrix", del:true,
+    cols:[{t:"text",ph:"Describe threat"},{t:"p"},{t:"i"},{t:"calc"},{t:"lvl"},{t:"area",ph:"Technical and organizational measures"}],
+    fromDom:function(){ return {v:[]}; },
+    blank:function(){ return {v:[]}; },
+    levels:[["Inherent",function(tr){ return selv(tr,1)*selv(tr,2); }]]
+  });
+
+  /* ---------- Plantilla C ---------- */
+  var gC=null, wC=wrapOf("Risk analysis matrix","Identified threat");
+  if(wC) gC=Grid({
+    wrap:wC, key:"tpl-c", del:true, rowHead:true,
+    cols:[{t:"threat",ph:"Project-specific threat"},{t:"p"},{t:"i"},{t:"calc"},{t:"lvl"},{t:"area",ph:"Control measure"},{t:"resid"}],
+    fromDom:function(tr){ var t=tr.cells[0].textContent.trim(); return /^\[.*\]$/.test(t)?{ph:t.slice(1,-1),v:[]}:{f:t,v:[]}; },
+    blank:function(){ return {ph:"Project-specific threat",v:[]}; },
+    levels:[["Inherent",function(tr){ return selv(tr,1)*selv(tr,2); }],["Residual",function(tr){ return selv(tr,6,0)*selv(tr,6,1); }]]
+  });
+
+  /* ---------- Plantilla D ---------- */
+  var gD=null, wD=wrapOf("Risk register and priority plan","ID");
+  function nextId(){ var m=0; if(gD) [].forEach.call(gD.tbody.rows,function(tr){ var x=/R(\d+)/.exec(tr.cells[0].textContent); if(x) m=Math.max(m,+x[1]); }); return "R"+(m+1); }
+  function setVal(tr,ci,val){ var f=tr.cells[ci].querySelector("input,textarea,select"); if(f){ f.value=val; if(f.tagName==="TEXTAREA") grow(f); } }
+  if(wD) gD=Grid({
+    wrap:wD, key:"tpl-d", del:true, rowHead:true,
+    cols:[{t:"id"},{t:"text",ph:"Threat"},{t:"score"},{t:"prio"},{t:"treat"},{t:"area",ph:"Measure"},{t:"text",ph:"Owner"},{t:"date"},{t:"score"},{t:"status"}],
+    fromDom:function(tr){ return {v:[tr.cells[0].textContent.trim()]}; },
+    blank:function(){ return {v:[nextId()]}; },
+    onEdit:function(e,tr){
+      if(e.target.closest("td")===tr.cells[3]) tr._row.m=e.target.value?1:0;
+      if(e.type==="change"&&e.target.type==="number"&&e.target.value!==""){ e.target.value=Math.min(25,Math.max(1,Math.round(+e.target.value)||1)); }
+    },
+    onRow:function(tr){
+      var b=band(numv(tr,2)), s=tr.cells[3].querySelector("select");
+      if(!tr._row.m) s.value=b?b.prio:"";
+      s.classList.toggle("ix-auto",!tr._row.m&&!!b);
+    },
+    levels:[["Inherent",function(tr){ return numv(tr,2); }],["Residual",function(tr){ return numv(tr,8); }]],
+    extra:'<button type="button" class="expand" data-ix="import">Import from Template C</button><button type="button" class="expand" data-ix="sort">Sort by priority</button>',
+    actions:{
+      "import":function(){
+        if(!gC) return;
+        var src=[].map.call(gC.tbody.rows,function(tr){
+          var r=readRow(gC,tr), res=r.v[6]||["",""], p=+r.v[1], i=+r.v[2];
+          return {name:(r.f||r.v[0]||"").trim(),score:p&&i?p*i:"",measure:r.v[5]||"",resid:(+res[0]&&+res[1])?(+res[0])*(+res[1]):""};
+        }).filter(function(x){ return x.name&&x.score; });
+        if(!src.length){ window.alert("Score at least one threat in Template C first (probability and impact)."); return; }
+        var rows=[].slice.call(gD.tbody.rows), used=[];
+        src.forEach(function(x){
+          var tr=rows.filter(function(t){ return t.cells[1].querySelector("input").value.trim().toLowerCase()===x.name.toLowerCase(); })[0]
+              ||rows.filter(function(t){ return used.indexOf(t)<0&&!t.cells[1].querySelector("input").value.trim()&&!numv(t,2); })[0];
+          if(!tr){ tr=gD.add(); rows.push(tr); }
+          used.push(tr);
+          setVal(tr,1,x.name); setVal(tr,2,x.score);
+          if(!tr.cells[5].querySelector("textarea").value.trim()) setVal(tr,5,x.measure);
+          if(x.resid) setVal(tr,8,x.resid);
+          compute(gD,tr);
+        });
+        summary(gD); save(gD);
+      },
+      "sort":function(){
+        var rank=function(tr){ var p=tr.cells[3].querySelector("select").value; return p?+p.slice(1):9; };
+        [].slice.call(gD.tbody.rows).sort(function(a,b){ return rank(a)-rank(b)||numv(b,2)-numv(a,2); })
+          .forEach(function(tr){ gD.tbody.appendChild(tr); });
+        save(gD);
+      }
+    }
+  });
+
+  /* ---------- Plantilla B ---------- */
+  var wB=wrapOf("Description of the processing","Field"), tB=wB&&wB.querySelector("table");
+  if(tB&&!tB.classList.contains("ix")){
+    tB.classList.add("ix");
+    var savedB=store("tpl-b")||[], today=new Date().toISOString().slice(0,10), fieldsB=[];
+    [].forEach.call(tB.tBodies[0].rows,function(tr,i){
+      var name=tr.cells[0].textContent.trim(), td=tr.cells[1], v=savedB[i]||"";
+      if(/number of data subjects/i.test(name)) td.innerHTML='<input type="number" min="0" step="1" inputmode="numeric" class="ix-in" placeholder="e.g. 12000" aria-label="'+esc(name)+'" value="'+esc(v)+'"><span class="ix-hint" aria-live="polite"></span>';
+      else if(/version \/ date/i.test(name)) td.innerHTML='<input type="text" class="ix-in" placeholder="v1.0 · '+today+'" aria-label="'+esc(name)+'" value="'+esc(v)+'">';
+      else td.innerHTML='<textarea class="ix-area" rows="1" aria-label="'+esc(name)+'">'+esc(v)+"</textarea>";
+      fieldsB.push(td.querySelector("input,textarea"));
+    });
+    var hintB=function(){
+      var f=tB.querySelector('input[type=number]'); if(!f) return;
+      var n=+f.value, h=f.nextElementSibling;
+      if(n>=50000){ h.className="ix-hint warn"; h.textContent="Large scale: 50,000 or more data subjects. Check question 8 in Template A."; }
+      else if(n>5000){ h.className="ix-hint"; h.textContent="More than 5,000 data subjects: a simplified PIA is recommended (section 4.3)."; }
+      else h.textContent="";
+    };
+    var tmrB, saveB=function(){ clearTimeout(tmrB); tmrB=setTimeout(function(){ store("tpl-b",fieldsB.map(function(f){ return f.value; })); },250); };
+    tB.addEventListener("input",function(e){ if(e.target.tagName==="TEXTAREA") grow(e.target); hintB(); saveB(); });
+    tB.querySelectorAll("textarea").forEach(grow); hintB();
+    var toolsB=document.createElement("div"); toolsB.className="ix-tools";
+    toolsB.innerHTML='<button type="button" class="expand">Clear</button>';
+    wB.parentNode.insertBefore(toolsB,wB.nextSibling);
+    toolsB.querySelector("button").addEventListener("click",function(){
+      if(!window.confirm("Clear every entry in this template?")) return;
+      fieldsB.forEach(function(f){ f.value=""; if(f.tagName==="TEXTAREA") grow(f); }); store("tpl-b",null); hintB();
+    });
+    liveExpand(wB);
+  }
+
+  /* ---------- 4.3: la tabla también se expande viva ---------- */
+  var h43=document.getElementById("s-4-3"), n43=h43&&h43.nextElementSibling;
+  while(n43&&!n43.classList.contains("table-wrap")){ if(/^H[2-4]$/.test(n43.tagName)){ n43=null; break; } n43=n43.nextElementSibling; }
+  if(n43) liveExpand(n43);
+
+  /* ---------- Impresión: valores como texto y C/D en horizontal ---------- */
+  function mirror(on){
+    document.querySelectorAll("table.ix .ix-pv").forEach(function(x){ x.parentNode.removeChild(x); });
+    if(!on) return;
+    document.querySelectorAll("table.ix .ix-in,table.ix .ix-sel,table.ix .ix-area").forEach(function(f){
+      var v=f.tagName==="SELECT"?(f.value?f.options[f.selectedIndex].text:""):f.value;
+      var s=document.createElement("span"); s.className="ix-pv"; s.textContent=v; f.parentNode.insertBefore(s,f.nextSibling);
+    });
+  }
+  var land=null;
+  window.addEventListener("beforeprint",function(){
+    mirror(true);
+    if(document.querySelector(".print-only table.ix.wide")){ land=document.createElement("style"); land.textContent="@page{size:landscape}"; document.head.appendChild(land); }
+  });
+  window.addEventListener("afterprint",function(){ mirror(false); if(land){ land.parentNode.removeChild(land); land=null; } });
+});
+</script>
+
 </head>
 <body>
 <a class="skip" href="#guide">Skip to the guide</a>
