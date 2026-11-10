@@ -243,7 +243,23 @@ table.authorities tr[hidden]{display:none}
 .callout.alert .callout-icon,.callout.alert .callout-title{color:#A31600}
 .callout.note{border-left:5px solid var(--deep)}
 .callout.license{border-left:5px solid var(--orange)}
-.callout.link{background:var(--cyan-tint);border-color:var(--cyan-line);border-left:5px solid var(--orange)}
+.callout.link{
+  background:linear-gradient(160deg,#FDEAF1,#FFF6F9);
+  border-color:#F6C6D7;
+  border-left:5px solid #E88AAE;
+}
+.callout.link .callout-icon,
+.callout.link .callout-title{color:#B4436E}
+.callout.link .current{color:#9A5D75}
+.callout.link .btn-cyan{
+  color:#B4436E;
+  border-color:#E88AAE;
+  background:#fff;
+}
+.callout.link .btn-cyan:hover{
+  background:#F9D5E3;
+  color:#8E2F55;
+}
 
 /* flags (Chapter 2) */
 .with-flag{display:inline-flex;align-items:flex-start;gap:.55em}
@@ -1034,10 +1050,174 @@ if(M && grid){
 })();
 
 </script>
+<!-- ===== MEJORAS VISUALES: 3.2, 3.3, 4.2 y capítulos 6–7 ===== -->
+<style>
+/* ---------- 3.2 Tres pilares: títulos centrados e icono abajo ---------- */
+.vx-pillars thead th,
+.vx-pillars tbody th{text-align:center!important;vertical-align:middle}
+.vx-pillars tbody th .t-ico{display:block;margin:10px auto 0;width:36px;height:36px;vertical-align:0}
+.vx-pillars tbody th .t-ico svg{width:36px;height:36px}
 
-</body>
-</html>
+/* ---------- 3.3 Principios como tarjetas con icono ---------- */
+.vx-principles{list-style:none;padding:0!important;margin:10px 0 28px!important;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.vx-principles>li{margin:0!important;padding:20px 18px!important;max-width:none!important;text-align:left!important;border:1px solid var(--cyan-line);border-top:4px solid var(--cyan);border-radius:var(--radius);background:linear-gradient(160deg,var(--cyan-tint),#fff 65%);box-shadow:0 6px 16px rgba(14,124,134,.08);transition:transform .2s ease,box-shadow .2s ease}
+.vx-principles>li:nth-child(even){border-color:var(--orange-line);border-top-color:var(--orange);background:linear-gradient(160deg,var(--orange-soft),#fff 65%)}
+.vx-principles>li:hover{transform:translateY(-3px);box-shadow:0 12px 24px rgba(10,17,32,.12)}
+.vx-principles .vx-pico{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:16px;background:#fff;border:1px solid var(--cyan-line);color:var(--cyan-ink);margin-bottom:12px}
+.vx-principles>li:nth-child(even) .vx-pico{border-color:var(--orange-line);color:var(--orange-ink)}
+.vx-principles .vx-pico svg{width:30px;height:30px}
+.vx-principles>li>strong:first-of-type{display:block;color:var(--deep);font-size:1.02rem;margin-bottom:4px}
 
+/* ---------- 4.2 Iconos centrados ---------- */
+.triplet li .i-big{margin:0 auto 10px}
 
+/* ---------- Capítulos 6 y 7: encabezados con icono ---------- */
+.vx-hico{display:inline-flex;align-items:center;justify-content:center;flex:none;width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--deep),var(--cyan));color:#fff;box-shadow:0 8px 18px rgba(31,78,103,.25);align-self:center}
+.vx-hico svg{width:26px;height:26px}
+h4.sec .vx-hico{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--orange),#F4AE6A)}
+h4.sec .vx-hico svg{width:20px;height:20px}
+@media (max-width:720px){#ch-6 h3.sec,#ch-7 h3.sec{flex-wrap:wrap;row-gap:4px}}
+
+/* ---------- Capítulos 6 y 7: listas como tarjetas ---------- */
+.vx-list{list-style:none;padding:0!important;margin:10px 0 26px!important;display:grid;gap:10px}
+.vx-list>li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start;margin:0!important;padding:14px 16px!important;max-width:none!important;background:#fff;border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:12px;box-shadow:0 3px 10px rgba(10,17,32,.05);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.vx-list>li:nth-child(even){border-left-color:var(--orange)}
+.vx-list>li:hover{transform:translateX(4px);box-shadow:0 8px 20px rgba(10,17,32,.10)}
+.vx-list .vx-bul{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--cyan-tint);color:var(--cyan-ink)}
+.vx-list>li:nth-child(even) .vx-bul{background:var(--orange-soft);color:var(--orange-ink)}
+.vx-list .vx-bul svg{width:18px;height:18px}
+.vx-list .vx-txt>strong:first-child{color:var(--deep)}
+.vx-list .vx-txt>.flag:first-child{margin-right:.35em}
+
+/* ---------- Iconos: trazo común ---------- */
+.vx-pillars svg,.vx-principles svg,.vx-hico svg,.vx-bul svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- Aparición suave al hacer scroll ---------- */
+@media (prefers-reduced-motion:no-preference){
+  .vx-reveal{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s cubic-bezier(.23,1,.32,1)}
+  .vx-reveal.is-in{opacity:1;transform:none}
+}
+@media print{.vx-reveal{opacity:1!important;transform:none!important}.vx-hico,.vx-bul,.vx-pico{display:none!important}}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+var I={
+scale:'<path d="M12 3v18M7 21h10M5 7h14M5 7l-3 6a3 3 0 006 0zM19 7l-3 6a3 3 0 006 0z"/>',
+target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>',
+filter:'<path d="M3 5h18l-7 8v6l-4-2v-4z"/>',
+check:'<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.6 2.6L16 9.5"/>',
+hourglass:'<path d="M6 3h12M6 21h12M7 3c0 5 10 7 10 9s-10 4-10 9M17 3c0 5-10 7-10 9s10 4 10 9"/>',
+lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/>',
+docok:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 14l2 2 4-4"/>',
+building:'<path d="M4 21V5l8-3 8 3v16M9 21v-5h6v5M8 9h2M14 9h2M8 13h2M14 13h2"/>',
+briefcase:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V4h6v3M3 13h18"/>',
+cpu:'<rect x="7" y="7" width="10" height="10" rx="1"/><path d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/>',
+chart:'<path d="M4 20V4M4 20h16"/><path d="M7 16l4-5 3 3 5-7"/>',
+wifi:'<path d="M2 9a15 15 0 0120 0M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1"/>',
+finger:'<path d="M12 11v4a6 6 0 01-1.5 4M8 6.5A6 6 0 0118 11v2M6 10a6 6 0 00-.5 2.5V15M9 12a3 3 0 016 0v3a9 9 0 01-1 4M15 21c.6-.9 1-2 1.2-3"/>',
+child:'<circle cx="12" cy="5" r="2.5"/><path d="M8 21v-6l-2-4 6-2 6 2-2 4v6M10 21v-4h4v4"/>',
+globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
+flower:'<circle cx="12" cy="9" r="2.5"/><path d="M12 6.5V3M14.5 9H18M9.5 9H6M12 11.5V21M12 16c-2 0-4-1-5-3M12 18c2 0 4-1 5-3"/>',
+coin:'<circle cx="12" cy="12" r="9"/><path d="M15 9c-1-1.5-6-1.5-6 1s6 1 6 3.5-5 2.5-6 1M12 6v2M12 16v2"/>',
+arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+dot:'<circle cx="12" cy="12" r="3.5"/>'
+};
+function svg(k){return '<svg viewBox="0 0 24 24" aria-hidden="true">'+(I[k]||I.dot)+'</svg>';}
+function q(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));}
+function nextOf(el,sel){var n=el&&el.nextElementSibling;while(n){if(n.matches(sel))return n;if(n.matches('h3.sec,h4.sec'))return null;n=n.nextElementSibling;}return null;}
+var reveal=[];
+
+/* 3.2: títulos centrados e icono abajo */
+var w32=nextOf(document.getElementById('s-3-2'),'.table-wrap');
+if(w32){var t=w32.querySelector('table');t.classList.add('vx-pillars');
+  q('tbody th',t).forEach(function(th){var ic=th.querySelector('.t-ico');if(ic){th.appendChild(ic);}});}
+
+/* 3.3: principios con icono */
+var ul33=nextOf(document.getElementById('s-3-3'),'ul');
+if(ul33){ul33.classList.add('vx-principles');
+  var PM=[[/lawful/i,'scale'],[/purpose/i,'target'],[/minimi/i,'filter'],[/accura/i,'check'],[/storage/i,'hourglass'],[/integrity/i,'lock'],[/accountab/i,'docok']];
+  q(':scope > li',ul33).forEach(function(li){var t=li.textContent,k='dot';
+    for(var i=0;i<PM.length;i++){if(PM[i][0].test(t)){k=PM[i][1];break;}}
+    li.insertAdjacentHTML('afterbegin','<span class="vx-pico">'+svg(k)+'</span>');reveal.push(li);});}
+
+/* 6.1 a fin del capítulo 7: encabezados */
+var H={'s-6-1':'building','s-6-2':'briefcase','s-7-1':'cpu','s-7-2':'chart','s-7-3':'wifi','s-7-4':'finger','s-7-5':'child','s-7-6':'globe','s-7-7':'flower','s-7-8':'coin'};
+Object.keys(H).forEach(function(id){var h=document.getElementById(id);if(!h)return;
+  var n=h.querySelector('.sec-num');(n||h).insertAdjacentHTML(n?'afterend':'afterbegin','<span class="vx-hico">'+svg(H[id])+'</span>');});
+q('#ch-7 h4.sec').forEach(function(h){h.insertAdjacentHTML('afterbegin','<span class="vx-hico">'+svg('dot')+'</span>');});
+
+/* 6.1 a fin del capítulo 7: listas como tarjetas */
+var start=document.getElementById('s-6-1');
+q('#ch-6 > ul, #ch-7 > ul').forEach(function(ul){
+  if(ul.classList.contains('triplet')||ul.classList.contains('ch-sections'))return;
+  if(ul.closest('#ch-6') && start && !(start.compareDocumentPosition(ul)&Node.DOCUMENT_POSITION_FOLLOWING))return;
+  ul.classList.add('vx-list');
+  q(':scope > li',ul).forEach(function(li){
+    var lead=li.firstElementChild&&li.firstElementChild.tagName==='STRONG';
+    var box=document.createElement('div');box.className='vx-txt';
+    while(li.firstChild)box.appendChild(li.firstChild);
+    li.innerHTML='<span class="vx-bul">'+svg(lead?'arrow':'check')+'</span>';li.appendChild(box);reveal.push(li);});
+});
+
+/* Aparición suave */
+if('IntersectionObserver' in window && !(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)){
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('is-in');io.unobserve(e.target);}});},{rootMargin:'0px 0px -40px 0px'});
+  reveal.forEach(function(el){el.classList.add('vx-reveal');io.observe(el);});
+}
+});
+</script>
+<!-- ===== QR clicables: autoridades (9.2), Buen Gobierno y PNT ===== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+.qr-link{display:inline-flex;flex-direction:column;align-items:center;gap:4px;margin:8px 0 2px;padding:6px;border-radius:12px;background:#fff;border:1px solid var(--line);text-decoration:none!important;box-shadow:0 3px 10px rgba(10,17,32,.08);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;cursor:pointer}
+.qr-link:hover,.qr-link:focus-visible{transform:scale(1.15);box-shadow:0 12px 26px rgba(10,17,32,.2);border-color:var(--cyan);position:relative;z-index:3}
+.qr-link .qr-box{display:block;line-height:0}
+.qr-link .qr-box img,.qr-link .qr-box canvas{width:84px!important;height:84px!important;display:block;border-radius:4px}
+.qr-link .qr-cap{font-size:.7rem;font-weight:700;color:var(--cyan-ink);white-space:nowrap}
+table.authorities td.web{min-width:120px}
+table.authorities td.web .qr-wrap{display:block;margin-bottom:6px}
+.qr-inline{display:flex;flex-wrap:wrap;align-items:center;gap:16px}
+/* QR de la caja rosa de la PNT */
+.callout.link .qr-link{border-color:#F6C6D7}
+.callout.link .qr-link .qr-cap{color:#B4436E}
+.callout.link .qr-link:hover{border-color:#E88AAE}
+@media (prefers-reduced-motion:reduce){.qr-link:hover{transform:none}}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  if(typeof QRCode==="undefined") return;
+  function makeQR(a,label){
+    var url=a.href, qr=document.createElement("a");
+    qr.className="qr-link"; qr.href=url; qr.target="_blank"; qr.rel="noopener";
+    qr.setAttribute("aria-label","QR code: open "+(label||url));
+    qr.innerHTML='<span class="qr-box"></span><span class="qr-cap">Scan or click</span>';
+    new QRCode(qr.querySelector(".qr-box"),{text:url,width:168,height:168,colorDark:"#0A1120",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+    return qr;
+  }
+  /* 9.2: un QR por cada enlace de cada autoridad */
+  document.querySelectorAll("table.authorities td.web a").forEach(function(a){
+    var row=a.closest("tr"), name=row?row.querySelector("th").textContent.trim():"";
+    var wrap=document.createElement("span"); wrap.className="qr-wrap";
+    a.parentNode.insertBefore(wrap,a); wrap.appendChild(a); wrap.appendChild(makeQR(a,name));
+  });
+  /* Buen Gobierno: "Sitio web" */
+  document.querySelectorAll('#ch-9 p a[href*="gob.mx/buengobierno"]').forEach(function(a){
+    if(a.closest("table")) return;
+    var p=a.closest("p"); p.classList.add("qr-inline"); p.appendChild(makeQR(a,"Buen Gobierno"));
+  });
+  /* PNT: caja rosa */
+  var pnt=document.querySelector('.callout.link a[href*="plataformadetransparencia"]');
+  if(pnt){ var p=pnt.closest("p"); p.classList.add("qr-inline"); p.appendChild(makeQR(pnt,"National Transparency Platform")); }
+});
+</script>
+<style>
+/* Salto de línea entre el enlace y el QR */
+table.authorities td.web .qr-wrap > a:first-child{display:block;margin-bottom:10px}
+.qr-inline{flex-direction:column;align-items:flex-start;gap:12px}
+.qr-inline .qr-link{margin-top:4px}
+
+/* Animación más suave: crece menos */
+.qr-link:hover,.qr-link:focus-visible{transform:scale(1.07)}
+</style>
 </body>
 </html>
