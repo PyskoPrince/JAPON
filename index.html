@@ -797,7 +797,7 @@ document.addEventListener("DOMContentLoaded",function(){
   <div class="footer-in">
     <div>
       <img class="f-logo" src="https://i.ibb.co/P7Z17v0/HS-LOGO.png" alt="Human System">
-      <p><strong>Human System</strong>, Privacy &amp; Data Governance Division.</p>
+      <p><strong>Privacy &amp; Data Governance Division.</strong></p>
       <p>Global Privacy Impact Assessment Guide, 2026 — 1st Edition. Made in Mexico.</p>
       <p class="tag">For the world. For every organization. For people.</p>
     </div>
@@ -1262,5 +1262,75 @@ table.authorities td.web .qr-wrap > a:first-child{display:block;margin-bottom:10
 /* Animación más suave: crece menos */
 .qr-link:hover,.qr-link:focus-visible{transform:scale(1.07)}
 </style>
+<!-- ===== Banderas automáticas: 7.4–7.8 y tabla 9.2 ===== -->
+<style>
+/* Banderas que faltaban: Unión Europea y Dinamarca */
+.fl-eu{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 480'%3E%3Cpath fill='%23039' d='M0 0h640v480H0z'/%3E%3Cg fill='%23fc0'%3E%3Ccircle cx='320' cy='96' r='18'/%3E%3Ccircle cx='392' cy='115' r='18'/%3E%3Ccircle cx='444' cy='168' r='18'/%3E%3Ccircle cx='464' cy='240' r='18'/%3E%3Ccircle cx='444' cy='312' r='18'/%3E%3Ccircle cx='392' cy='365' r='18'/%3E%3Ccircle cx='320' cy='384' r='18'/%3E%3Ccircle cx='248' cy='365' r='18'/%3E%3Ccircle cx='196' cy='312' r='18'/%3E%3Ccircle cx='176' cy='240' r='18'/%3E%3Ccircle cx='196' cy='168' r='18'/%3E%3Ccircle cx='248' cy='115' r='18'/%3E%3C/g%3E%3C/svg%3E")}
+.fl-dk{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 480'%3E%3Cpath fill='%23c8102e' d='M0 0h640v480H0z'/%3E%3Cpath fill='%23fff' d='M205 0h68v480h-68z'/%3E%3Cpath fill='%23fff' d='M0 206h640v68H0z'/%3E%3C/svg%3E")}
+.fl-auto{margin-right:.4em}
+th .fl-auto + .fl-auto, li .fl-auto + .fl-auto{margin-left:-.15em}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  var MAP=[
+    [/Scotland/,"gb-sct"],[/United Kingdom/,"gb"],[/United States/,"us"],
+    [/European Union|\bEU\b/,"eu"],[/South Korea/,"kr"],[/South Africa/,"za"],[/Saudi Arabia/,"sa"],
+    [/New Zealand/,"nz"],[/Hong Kong/,"hk"],[/Dominican Republic/,"do"],[/El Salvador/,"sv"],
+    [/Mexico/,"mx"],[/Spain/,"es"],[/France/,"fr"],[/Germany/,"de"],[/Italy/,"it"],[/Denmark/,"dk"],
+    [/Cuba/,"cu"],[/Argentina/,"ar"],[/Australia/,"au"],[/Belize/,"bz"],[/Bolivia/,"bo"],[/Botswana/,"bw"],
+    [/Brazil/,"br"],[/Canada/,"ca"],[/China/,"cn"],[/Colombia/,"co"],[/Egypt/,"eg"],[/Ghana/,"gh"],
+    [/Greece/,"gr"],[/Honduras/,"hn"],[/Ireland/,"ie"],[/Japan/,"jp"],[/Kenya/,"ke"],[/Latvia/,"lv"],
+    [/Lithuania/,"lt"],[/Malaysia/,"my"],[/Netherlands/,"nl"],[/Nigeria/,"ng"],[/Norway/,"no"],
+    [/Paraguay/,"py"],[/Philippines/,"ph"],[/Poland/,"pl"],[/Russia/,"ru"],[/Singapore/,"sg"],
+    [/Sweden/,"se"],[/Switzerland/,"ch"],[/Taiwan/,"tw"],[/Tanzania/,"tz"],[/Thailand/,"th"],
+    [/Turkey/,"tr"],[/Ukraine/,"ua"],[/Uruguay/,"uy"],[/Venezuela/,"ve"]
+  ];
+  function codes(label){
+    var hits=[];
+    MAP.forEach(function(m){var r=new RegExp(m[0].source,"g"),x=r.exec(label);
+      if(x&&!hits.some(function(h){return h.c===m[1];}))hits.push({c:m[1],i:x.index});});
+    if(hits.some(function(h){return h.c==="gb-sct";}))hits=hits.filter(function(h){return h.c!=="gb";});
+    return hits.sort(function(a,b){return a.i-b.i;}).map(function(h){return h.c;});
+  }
+  function addFlags(target,label){
+    if(!target||target.querySelector(".flag"))return;
+    codes(label).reverse().forEach(function(c){
+      target.insertAdjacentHTML("afterbegin",'<span class="flag fl-'+c+' fl-auto" aria-hidden="true"></span>');
+    });
+  }
+  /* 7.4 a 7.8 */
+  var start=document.getElementById("s-7-4"), ch7=document.getElementById("ch-7");
+  if(start&&ch7){
+    var after=function(el){return start.compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING;};
+    ch7.querySelectorAll('th[scope="row"]').forEach(function(th){ if(after(th)) addFlags(th,th.textContent); });
+    ch7.querySelectorAll("li").forEach(function(li){
+      if(!after(li))return;
+      var s=li.querySelector("strong"); if(!s)return;
+      var t=s.textContent.trim(); if(!/:$/.test(t))return;   /* solo «País:» */
+      var box=s.parentNode; if(box!==li&&!box.classList.contains("vx-txt"))return;
+      if(codes(t).length) addFlags(box,t);
+    });
+  }
+  /* 9.2: autoridades */
+  document.querySelectorAll('table.authorities th[data-label="Country"]').forEach(function(th){ addFlags(th,th.textContent); });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  var h=document.getElementById("s-7-5"); if(!h) return;
+  var M={"the EU":"eu","Mexico":"mx","Scotland":"gb-sct","Greece":"gr","Sweden":"se","Latvia":"lv",
+         "Lithuania":"lt","Poland":"pl","Australia":"au","Egypt":"eg","Tanzania":"tz","Botswana":"bw"};
+  var ul=h.nextElementSibling;
+  while(ul && ul.tagName!=="UL"){ if(/^H[2-4]$/.test(ul.tagName)) return; ul=ul.nextElementSibling; }
+  if(!ul) return;
+  ul.querySelectorAll(":scope > li").forEach(function(li){
+    if(li.querySelector(".flag")) return;
+    var m=li.textContent.trim().match(/^In (the EU|[A-Z][a-z]+)/);
+    var c=m && M[m[1]]; if(!c) return;
+    var box=li.querySelector(":scope > .vx-txt")||li;
+    box.insertAdjacentHTML("afterbegin",'<span class="flag fl-'+c+' fl-auto" aria-hidden="true"></span>');
+  });
+});
+</script>
 </body>
 </html>
