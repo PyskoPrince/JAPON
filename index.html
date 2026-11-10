@@ -712,6 +712,82 @@ document.addEventListener("DOMContentLoaded",function(){
   });
 });
 </script>
+<!-- ===== 4.3 Pre-screening interactivo ===== -->
+<style>
+.ps-opt{display:inline-flex;align-items:center;justify-content:center;min-width:58px;padding:6px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-weight:700;font-size:.85rem;color:var(--deep);cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
+.ps-opt:hover{transform:translateY(-1px);border-color:var(--cyan)}
+.ps-opt:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.ps-opt[aria-pressed="true"].yes{background:var(--orange);border-color:var(--orange);color:#fff}
+.ps-opt[aria-pressed="true"].no{background:var(--cyan);border-color:var(--cyan);color:#fff}
+table.ps-table td:nth-child(2),table.ps-table td:nth-child(3),table.ps-table thead th:nth-child(n+2){text-align:center}
+table.ps-table tr.ps-yes td:first-child{box-shadow:inset 4px 0 0 var(--orange)}
+table.ps-table tr.ps-no td:first-child{box-shadow:inset 4px 0 0 var(--cyan)}
+.ps-result{margin:4px 0 28px;padding:20px 22px;border-radius:18px;color:#fff;background:linear-gradient(135deg,var(--night),#163a4f);border:1px solid rgba(76,161,175,.35);display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}
+.ps-badge{font-family:var(--display);font-size:2.2rem;line-height:1;min-width:64px;text-align:center;color:#9FDCE4}
+.ps-result[data-level="full"] .ps-badge{color:var(--orange)}
+.ps-result[data-level="simple"] .ps-badge{color:#F4C46A}
+.ps-result[data-level="none"] .ps-badge{color:#7FD6A4}
+.ps-title{font-weight:700;font-size:1.05rem;margin:0 0 4px}
+.ps-desc{margin:0;color:rgba(255,255,255,.78);font-size:.92rem}
+.ps-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.12);margin-top:10px;overflow:hidden}
+.ps-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--orange));transition:width .3s ease}
+.ps-reset{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:6px 14px;font-weight:700;cursor:pointer}
+.ps-reset:hover{border-color:var(--orange)}
+@media (max-width:640px){.ps-result{grid-template-columns:1fr;text-align:left}.ps-badge{text-align:left}}
+@media print{.ps-reset{display:none}.ps-result{background:#fff;color:#000}.ps-desc{color:#333}}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  var h=document.getElementById("s-4-3"); if(!h) return;
+  var n=h.nextElementSibling, wrap=null;
+  while(n){ if(n.classList.contains("table-wrap")){wrap=n;break;} if(/^H[2-4]$/.test(n.tagName)) return; n=n.nextElementSibling; }
+  if(!wrap) return;
+  var table=wrap.querySelector("table"); table.classList.add("ps-table");
+  var rows=Array.prototype.slice.call(table.querySelectorAll("tbody tr"));
+  var ans=new Array(rows.length).fill(null);
+  var LAST=rows.length-1; /* pregunta de los 5,000 titulares */
+
+  rows.forEach(function(tr,i){
+    var q=tr.cells[0].textContent.trim();
+    ["yes","no"].forEach(function(v,k){
+      var td=tr.cells[k+1];
+      td.innerHTML='<button type="button" class="ps-opt '+v+'" aria-pressed="false" aria-label="'+(v==="yes"?"Yes":"No")+': '+q.replace(/"/g,"&quot;")+'">'+(v==="yes"?"Yes":"No")+'</button>';
+      td.firstChild.addEventListener("click",function(){
+        ans[i]=(ans[i]===v)?null:v; paint();
+      });
+    });
+  });
+
+  var box=document.createElement("div");
+  box.className="ps-result"; box.setAttribute("aria-live","polite");
+  box.innerHTML='<div class="ps-badge">0/'+rows.length+'</div><div><p class="ps-title"></p><p class="ps-desc"></p><div class="ps-bar"><i></i></div></div><button type="button" class="ps-reset">Reset</button>';
+  wrap.parentNode.insertBefore(box,wrap.nextSibling);
+  box.querySelector(".ps-reset").addEventListener("click",function(){ans.fill(null);paint();});
+
+  function paint(){
+    rows.forEach(function(tr,i){
+      tr.classList.toggle("ps-yes",ans[i]==="yes"); tr.classList.toggle("ps-no",ans[i]==="no");
+      tr.querySelectorAll(".ps-opt").forEach(function(b){ b.setAttribute("aria-pressed", b.classList.contains(ans[i]||"_")?"true":"false"); });
+    });
+    var done=ans.filter(Boolean).length, core=ans.slice(0,LAST).filter(function(a){return a==="yes";}).length;
+    var level,title,desc;
+    if(core>0){ level="full"; title="Full PIA recommended";
+      desc=core+" high-risk "+(core===1?"criterion applies":"criteria apply")+". Start the formal PIA process (Template A onwards)."; }
+    else if(done<rows.length){ level=""; title="Answer every question";
+      desc=(rows.length-done)+" question(s) left to get a result."; }
+    else if(ans[LAST]==="yes"){ level="simple"; title="Simplified PIA recommended";
+      desc="No high-risk criterion applies, but the processing affects more than 5,000 data subjects."; }
+    else { level="none"; title="Full PIA not required";
+      desc="No criterion applies. Record this pre-screening and review it if the processing changes."; }
+    box.setAttribute("data-level",level);
+    box.querySelector(".ps-badge").textContent=done+"/"+rows.length;
+    box.querySelector(".ps-title").textContent=title;
+    box.querySelector(".ps-desc").textContent=desc;
+    box.querySelector(".ps-bar i").style.width=(done/rows.length*100)+"%";
+  }
+  paint();
+});
+</script>
 </head>
 <body>
 <a class="skip" href="#guide">Skip to the guide</a>
