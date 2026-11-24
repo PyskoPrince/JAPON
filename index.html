@@ -353,6 +353,13 @@ dialog.tbl::backdrop{background:rgba(10,17,32,.7)}
 .footer .f-logo{width:96px;margin-bottom:12px}
 .footer .tag{color:var(--cyan-ink);font-weight:600}
 .footer .footer-bottom{max-width:1280px;margin:0 auto;padding:16px clamp(16px,3vw,32px) 30px;border-top:1px solid var(--line);font-size:.84rem;color:var(--muted)}
+.footer-orgs{max-width:1280px;margin:0 auto;padding:4px clamp(16px,3vw,32px) 26px}
+.footer .f-orgs{display:flex;flex-wrap:wrap;align-items:center;gap:16px 34px}
+.footer .f-orgs li{display:flex;align-items:center;min-height:50px;margin:0}
+.f-orgs img{display:block;height:42px;width:auto;max-width:136px;object-fit:contain}
+.f-orgs .is-sq img{height:50px}
+.f-orgs li.f-org-off img{display:none}
+.f-orgs li.f-org-off::after{content:attr(data-abbr);display:inline-flex;align-items:center;height:30px;padding:0 10px;border:1px solid var(--line);border-radius:6px;font-size:.74rem;font-weight:700;letter-spacing:.06em;color:var(--muted)}
 
 /* ---------- responsive ---------- */
 @media (max-width:1100px){
@@ -369,6 +376,10 @@ dialog.tbl::backdrop{background:rgba(10,17,32,.7)}
   .hero-inner{grid-template-columns:1fr}
   .brand-sep,.brand-doc{display:none}
   .footer-in{grid-template-columns:1fr}
+  .footer .f-orgs{gap:12px 24px}
+  .footer .f-orgs li{min-height:40px}
+  .f-orgs img{height:34px;max-width:112px}
+  .f-orgs .is-sq img{height:40px}
 }
 @media (max-width:720px){
   body{font-size:16.5px}
@@ -1307,6 +1318,16 @@ mark.sh-hit.is-current{background:var(--orange);color:var(--night);box-shadow:0 
         <li><a href="https://humansystem.mx/">humansystem.mx</a></li>
       </ul>
     </div>
+  </div>
+  <div class="footer-orgs">
+    <ul class="f-orgs" aria-label="International organizations">
+      <li class="is-sq" data-abbr="UNESCO"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/UNESCO_logo_English.svg/330px-UNESCO_logo_English.svg.png" width="171" height="159" alt="United Nations Educational, Scientific and Cultural Organization (UNESCO)" title="United Nations Educational, Scientific and Cultural Organization (UNESCO)" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('f-org-off')"></li>
+      <li data-abbr="UN"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Logo_of_the_United_Nations.svg/330px-Logo_of_the_United_Nations.svg.png" width="1970" height="610" alt="United Nations (UN)" title="United Nations (UN)" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('f-org-off')"></li>
+      <li data-abbr="IACHR"><img src="https://en.wikipedia.org/wiki/Special:FilePath/Inter-American_Commission_on_Human_Rights_logo.svg?width=330" alt="Inter-American Commission on Human Rights (IACHR)" title="Inter-American Commission on Human Rights (IACHR)" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('f-org-off')"></li>
+      <li class="is-sq" data-abbr="OAS"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Seal_of_the_Organization_of_American_States.png/330px-Seal_of_the_Organization_of_American_States.png" width="632" height="632" alt="Organization of American States (OAS)" title="Organization of American States (OAS)" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('f-org-off')"></li>
+      <li class="is-sq" data-abbr="ICAO"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ICAO_logo.svg/330px-ICAO_logo.svg.png" width="1184" height="946" alt="International Civil Aviation Organization (ICAO)" title="International Civil Aviation Organization (ICAO)" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('f-org-off')"></li>
+      <li data-abbr="IDB"><img src="https://en.wikipedia.org/wiki/Special:FilePath/IDB_logo.svg?width=330" alt="Inter-American Development Bank (IDB)" title="Inter-American Development Bank (IDB)" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('f-org-off')"></li>
+    </ul>
   </div>
   <p class="footer-bottom">© 2026 Human System. Information current to October 2026. Laws change: check the official sources before relying on them.</p>
 </footer>
