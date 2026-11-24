@@ -1,4 +1,4 @@
- <!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -1729,6 +1729,11 @@ h4.sec .vx-hico svg{width:20px;height:20px}
 .vx-list .vx-bul{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--cyan-tint);color:var(--cyan-ink)}
 .vx-list>li:nth-child(even) .vx-bul{background:var(--orange-soft);color:var(--orange-ink)}
 .vx-list .vx-bul svg{width:18px;height:18px}
+.vx-list>li.vx-noico{grid-template-columns:minmax(0,1fr)}
+.vx-list.vx-plain{display:block;list-style:disc;padding-left:1.3em!important}
+.vx-list.vx-plain>li{display:list-item;background:none;border:0;border-radius:0;box-shadow:none;padding:0 0 0 .2em!important;margin:0 0 12px!important}
+.vx-list.vx-plain>li:last-child{margin-bottom:0!important}
+.vx-list.vx-plain>li:hover{transform:none;box-shadow:none}
 .vx-list .vx-txt>strong:first-child{color:var(--deep)}
 .vx-list .vx-txt>.flag:first-child{margin-right:.35em}
 
@@ -1790,16 +1795,24 @@ Object.keys(H).forEach(function(id){var h=document.getElementById(id);if(!h)retu
 q('#ch-7 h4.sec').forEach(function(h){h.insertAdjacentHTML('afterbegin','<span class="vx-hico">'+svg('dot')+'</span>');});
 
 /* 6.1 a fin del capítulo 7: listas como tarjetas */
+/* 7.4 sin flechas; 7.5 sin palomas; 7.6 solo texto con punto, sin tarjeta */
+var NOICO={'s-7-4':'arrow','s-7-5':'check'};
+var PLAIN={'s-7-6':true};
+function secOf(el){var p=el.previousElementSibling;while(p){if(p.matches('h3.sec[id]'))return p.id;p=p.previousElementSibling;}return '';}
 var start=document.getElementById('s-6-1');
 q('#ch-6 > ul, #ch-7 > ul').forEach(function(ul){
   if(ul.classList.contains('triplet')||ul.classList.contains('ch-sections'))return;
   if(ul.closest('#ch-6') && start && !(start.compareDocumentPosition(ul)&Node.DOCUMENT_POSITION_FOLLOWING))return;
   ul.classList.add('vx-list');
+  var sec=secOf(ul), drop=NOICO[sec], only=PLAIN[sec];
+  if(only) ul.classList.add('vx-plain');
   q(':scope > li',ul).forEach(function(li){
     var lead=li.firstElementChild&&li.firstElementChild.tagName==='STRONG';
     var box=document.createElement('div');box.className='vx-txt';
     while(li.firstChild)box.appendChild(li.firstChild);
-    li.innerHTML='<span class="vx-bul">'+svg(lead?'arrow':'check')+'</span>';li.appendChild(box);reveal.push(li);});
+    var k=lead?'arrow':'check';
+    if(!only){ if(drop===k){li.classList.add('vx-noico');}else{li.innerHTML='<span class="vx-bul">'+svg(k)+'</span>';} }
+    li.appendChild(box);reveal.push(li);});
 });
 
 /* Aparición suave */
